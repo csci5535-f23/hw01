@@ -1,0 +1,530 @@
+\documentclass[12pt]{exam}
+\usepackage{5535}
+
+\runningfooter{}{\thepage}{}
+\title{CSCI 5535: Homework Assignment 1: Statics and Dynamics for a Simple Language}
+\date{Fall 2023: Due Friday, September 22, 2023}
+\author{}
+
+\begin{document}
+\maketitle
+
+The purpose of this assignment is to formalize language constructs
+using a big-step operational semantics.
+
+Recall the evaluation guideline from the course syllabus.
+\begin{quote}\em
+  Both your ideas and also the clarity with which they are expressed
+  matter---both in your English prose and your code!
+
+  We will consider the following criteria in our grading: 
+  \begin{itemize}
+    \item \emph{How well does your submission answer the questions?}
+      For example, a common mistake is to give an example when a question
+      asks for an explanation.  An example may be useful in your
+      explanation, but it should not take the place of the explanation.
+    \item \emph{How clear is your submission?}  If we cannot
+      understand what you are trying to say, then we cannot give you
+      points for it.  Try reading your answer aloud to yourself or a
+      friend; this technique is often a great way to identify holes in
+      your reasoning.  For code, not every program that "works"
+      deserves full credit. We must be able to read and understand
+      your intent.  Make sure you state any preconditions or
+      invariants for your functions.
+  \end{itemize}
+\end{quote}
+
+\paragraph{Submission Instructions.}
+
+Typesetting is preferred but scanned, clearly legible handwritten write-ups are acceptable. Please no other formats---no
+\texttt{.doc} or \texttt{.docx}. You may use whatever tool you wish (e.g., \LaTeX, Word, markdown, plain text, pencil+paper) as long as it is legibly
+converted into a \texttt{pdf}.
+
+
+\begin{questions}
+  \question \textbf{Feedback}.  Complete the survey on the linked from
+  the moodle after completing this assignment.  Any non-empty answer
+  will receive full credit.
+
+  % \question \textbf{Language Design.}  It is interesting to study
+  % early articles and see how they have impacted
+
+  % On Piazza, comment on some aspect from Hoare's \emph{Hints On
+  %   Programming Language Design} that relates to your programming
+  % experience.  Provide additional evidence in favor of one his points
+  % and against one of his points. Do not exceed three paragraphs.
+
+  % Both your ideas and also the clarity with which they are expressed
+  % (i.e., your English prose) matter. I should be able to identify your
+  % main claim, the arguments you are bringing to bear, and your
+  % conclusion.
+
+\question \textbf{Induction Practice on Cards}. In this question, we will do some induction
+practice on ``cards'' from the previous assignment. Recall our model of a deck of cards:
+  
+\newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\mt}[1]{\ensuremath{\text{\textnormal{#1}}}}
+\newcommand{\heart}{\ensuremath{\heartsuit}}
+\newcommand{\spade}{\ensuremath{\spadesuit}}
+\newcommand{\club}{\ensuremath{\clubsuit}}
+\newcommand{\dia}{\ensuremath{\diamondsuit}}
+\newcommand{\card}[1]{\ensuremath{#1 \; \mt{card}}}
+\newcommand{\deck}[1]{\ensuremath{#1 \; \mt{deck}}}
+\newcommand{\emp}{\ensuremath{\ms{nil}}}
+\newcommand{\cons}[2]{\ensuremath{\ms{cons}(#1, #2)}}
+\newcommand{\unshuff}[3]{\ensuremath{\ms{unshuffle}(#1, #2, #3)}}
+
+\newcommand{\cut}[3]{\ensuremath{\ms{cut}(#1, #2, #3)}}
+\newcommand{\edeck}[1]{\ensuremath{#1 \; \mt{even}}}
+\newcommand{\odeck}[1]{\ensuremath{#1 \; \mt{odd}}}
+
+\begin{mathpar}
+\infer[]{ }{\card{\heart}} 
+
+\infer[]{ }{\card{\spade}} 
+
+\infer[]{ }{\card{\club}}
+
+\infer[]{ }{\card{\dia}}
+
+\infer[]{ }{\deck{\emp}}
+
+\infer[]
+  {\card{c} \\ \deck{s}}
+  {\deck{\cons{c}{s}}}
+\end{mathpar}
+
+These rules are an iterated inductive definition for \deck{s} and lead to the following induction principle:
+\begin{quote}\em
+In order to show $P(s)$ for some property $P$, for any \deck{s}, it is enough to show
+\begin{enumerate}
+\item $P(\emp)$.
+\item $P(\cons{c}{s'})$, assuming \card{c} and $P(s')$. \emph{This $P(s')$ is called the induction hypothesis.}
+\end{enumerate}
+\end{quote}
+
+Also recall that definition of the $\unshuff{s_1}{s_2}{s_3}$ judgment.
+\begin{mathpar}
+\infer[]{ }{\unshuff{\emp}{\emp}{\emp}}
+
+\infer[]
+  {\card{c} \\ \unshuff{s_1}{s_2}{s_3}}
+  {\unshuff{\cons{c}{s_1}}{s_2}{\cons{c}{s_3}}}
+  
+\infer[]
+  {\card{c} \\ \unshuff{s_1}{s_2}{s_3}}
+  {\unshuff{\cons{c}{s_1}}{\cons{c}{s_2}}{s_3}}
+\end{mathpar}
+
+\begin{parts}
+\part Prove the following about the $\unshuff{s_1}{s_2}{s_3}$ judgment:
+  \begin{quote}\em
+  If $\deck{s_1}$, then $\unshuff{s_1}{s_2}{s_3}$ for some decks $s_2$ and $s_3$.
+  \end{quote}
+
+  Note that there are a number of different ways of proving this! For this
+  exercise, be explicit about the induction principle you use and
+  identify what property $P$ you are proving with that induction principle.
+
+\part For this next part, we will define, using simultaneous inductive definition, decks of cards with even or odd numbers of cards in them.
+\begin{mathpar}
+\infer[]{ }{\edeck{\emp}}
+
+\infer[]
+  {\card{c} \\ \odeck{s}}
+  {\edeck{\cons{c}{s}}}
+
+\infer[]
+  {\card{c} \\ \edeck{s}}
+  {\odeck{\cons{c}{s}}}
+\end{mathpar}
+
+This inductive definition is \emph{simultaneous} (because it simultaneously defines $\edeck{s}$ and $\odeck{s}$), as well as \emph{iterated} (because it relies on the previously-defined definition of $\card{c}$).
+
+\begin{subparts}
+\subpart
+What is the induction principle for these judgments---that is, for the judgments $\edeck{s}$ and $\odeck{s}$? 
+
+\subpart
+Prove the following theorem that we can see as a \emph{derived induction principle}:
+
+\begin{quote}\em
+  For all properties $S$, if
+  \begin{enumerate}
+  \item $S(\emp)$; and
+  \item for all $c_1$, $c_2$, and $s$, if \card{c_1}, \card{c_2}, and $S(s)$, then $S(\cons{c_1}{\cons{c_2}{s}})$;
+  \end{enumerate}
+  then for all $s$, if \edeck{s} then $S(s)$.
+\end{quote}
+
+You will want to use the induction principle mentioned above in order to prove this. And as always,
+remember to carefully consider and state the induction hypothesis you are using.
+
+\subpart
+Another ``operation'' on cards is \emph{cutting}, where a player separates a single deck of cards into two decks of cards by removing some number of cards from the top of the deck. We can define cutting cards using an inductive definition:
+\begin{mathpar}
+\infer[]
+  {\deck{s}}
+  {\cut{s}{s}{\emp}}
+
+\infer[]
+  {\card{c} \\ \cut{s_1}{s_2}{s_3}}
+  {\cut{\cons{c}{s_1}}{s_2}{\cons{c}{s_3}}}
+\end{mathpar}
+
+Using the derived induction principle from the previous task (you can use the induction principle from the previous task even if you do not do the previous task!), prove the following:
+
+\begin{quote}\em
+For all $s_1$, $s_2$, $s_3$, if \edeck{s_2}, \edeck{s_3}, and \cut{s_1}{s_2}{s_3}, then \edeck{s_1}.
+\end{quote}
+
+You are allowed to assume the following lemmas:
+
+\begin{itemize}
+\item {\em Inversion for {\sf nil}:} For all $s_1$ and $s_2$, if \cut{s_1}{s_2}{\emp}, then $s_1 = s_2$ and \deck{s_1}.
+\item {\em Inversion for {\sf cons}:} For all $s_1$, $s_2$, and $s_3$, if \cut{s_1}{s_2}{\cons{c}{s_3}}, then there exists a $s_1'$ such that $s_1 = \cons{c}{s_1'}$, \card{c}, and \cut{s_1'}{s_2}{s_3}.
+\end{itemize}
+
+\end{subparts}
+
+\end{parts}
+
+\question \textbf{Language Extension and Run-Time Errors.}
+\begin{parts}
+\part Consider the $\Limp$ language from FSPL with the $\Aexp$ sub-language
+  extended with an integer division expression:
+  \begin{grammar}
+    \aexp & \bnfdef & \cdots \bnfalt \binary{\aexp_1}{/}{\aexp_2}
+  \end{grammar}
+  Explain what changes must be made to the big-step operational semantics (i.e., the evaluation judgment form
+  $\Jieval{\aexp}{\sigma}{\num}$). Write out formally any new rules of inference you introduce. 
+\part Consider the $\Lnumstr$ language from PFPL (in Section 6.3) similarly extended
+  with an integer division expression:
+  \begin{grammar}
+    e & \bnfdef & \cdots \;\bnfalt\; \divexp{e_1}{e_2}
+  \end{grammar}
+Complete the formalization of the extension of \Lnumstr{} with $\divexp{e_1}{e_2}$. That is,
+extend the judgment forms $\Jval{e}$, $\steps{e}{e'}$, $\err{e}$,
+$\eval{e}{e'}$, and $\typeJC{e}{\tau}$ from the appendix with rules for
+expression $\divexp{e_1}{e_2}$ as appropriate.
+\end{parts}
+
+\question \textbf{Type Safety.} Again, consider the $\Lnumstr$ language from PFPL. 
+
+The tasks here ask you to prove (meta-theoretical) properties about the
+language~\Lnumstr. They are ``meta theoretical''
+in that they give a theory about the theory of \Lnumstr and are true about a
+large set of \Lnumstr~programs, not specific, individual programs.
+Language~\Lnumstr{} is, by design, tiny to focus on the essence of
+meta-theory of programming languages.
+
+There is a lot of error checking going on in the dynamics in Appendix A. But as we will been discussing in class, we can eliminate much or all of this by equipping our language with a static type system (see Chapter 6 of PFPL)!
+
+The type checking rules for \Lnumstr~are reproduced in Appendix B for your reference.
+
+\textbf{Grading criteria:} To receive full credit for any proof, you must \emph{at least} do the following:
+\begin{itemize}
+\item At the beginning of your proof, specify over what structure or derivation you are performing induction (i.e., which structure's inductive principle are you using?)
+\item In the inductive cases of the proof, specify how you are applying the inductive hypothesis, and what result it gives you.
+\end{itemize}
+\emph{If you omit these steps and/or do not make them explicit, you
+  will receive zero credit for your proof.}  If you attempt to do
+these steps, but you make a mistake, you may still receive some partial credit, depending on your proof.
+
+\textbf{Note on omitting redundant proof cases:} In the proofs below, some cases are very
+similar to other cases, e.g., the cases for \texttt{plus} and
+\texttt{times} in the proofs below are likely to be analogous, in that
+(nearly) the same proof steps are used in each.
+%
+When this happens, you can omit the redundant cases as follows: If you
+do one case, say for \texttt{plus}, you may (optionally) write in the
+other case for \texttt{times} that it is ``analogous to the case
+above, for \texttt{plus}''.  You must make this omission explicit, to
+show that you have thought about it.  Further, this shortcut is only
+applicable when the cases really are analogous, and (nearly) the same
+steps apply in the proof. \emph{When in doubt, do not omit the
+  proof case.}
+
+\begin{parts}
+\part \textbf{Canonical Forms.}
+Prove that if $\Jval{e}$, then
+\begin{enumerate}
+\item if $\typeJC{e}{\Enumt}$ then $e = \Enum{n}$ for some number $n$.
+\item if $\typeJC{e}{\Estrt}$ then $e = \Estr{s}$ for some string $s$.
+\end{enumerate}
+
+\part \textbf{Substitution.} State and prove the \emph{substitution lemma} for \Lnumstr.
+
+\part \textbf{Progress.} State and prove the \emph{progress theorem} for \Lnumstr.
+To receive full credit, you must additionally use the canonical forms lemma correctly, when appropriate.
+
+\part \textbf{Preservation.} State and prove the \emph{preservation theorem} for \Lnumstr.
+To receive full credit, you must additionally use the substitution lemma correctly, when appropriate.
+\end{parts}
+
+\end{questions}
+\clearpage
+\appendix
+\section{Dynamics of \Lnumstr}
+\noindent
+$\fbox{\inferrule{}{\Jval{e}}}$
+\begin{mathpar}
+\inferrule{ }
+          {\Jval{\Enum{n}}}
+
+\inferrule{ }
+		  {\Jval{\Estr{s}}}
+\end{mathpar}
+$\fbox{\inferrule{}{\steps{e}{e'}}}$
+\begin{mathpar}
+\inferrule{ }{
+	\steps{\plus{\Enum{n_1}}{\Enum{n_2}}}{\Enum{n_1 + n_2}}
+}
+
+\inferrule{
+	\steps{e_1}{e_1'}
+}{
+	\steps{\plus{e_1}{e_2}}
+		  {\plus{e_1'}{e_2}}
+}
+
+\inferrule{
+	\steps{e_2}{e_2'}
+}{
+	\steps{\plus{\Enum{n_1}}{e_2}}
+		  {\plus{\Enum{n_1}}{e_2'}}
+}
+
+\inferrule{ }{
+	\steps{\mult{\Enum{n_1}}{\Enum{n_2}}}{\Enum{n_1 \cdot n_2}}
+}
+
+\inferrule{
+	\steps{e_1}{e_1'}
+}{
+	\steps{\mult{e_1}{e_2}}
+		  {\mult{e_1'}{e_2}}
+}
+
+\inferrule{
+	\steps{e_2}{e_2'}
+}{
+	\steps{\mult{\Enum{n_1}}{e_2}}
+		  {\mult{\Enum{n_1}}{e_2'}}
+}
+
+\inferrule{ }{
+	\steps{\cat{\Estr{s_1}}{\Estr{s_2}}}{\Estr{s_1 \text{\textasciicircum} s_2}}
+}
+
+\inferrule{
+	\steps{e_1}{e_1'}
+}{
+	\steps{\cat{e_1}{e_2}}
+		  {\cat{e_1'}{e_2}}
+}
+
+\inferrule{
+	\steps{e_2}{e_2'}
+}{
+	\steps{\cat{\Estr{s_1}}{e_2}}
+		  {\cat{\Estr{s_1}}{e_2'}}
+}
+
+\inferrule{ }{
+	\steps{\len{\Estr{s}}}{\Enum{|s|}}
+}
+
+\inferrule{
+	\steps{e}{e'}
+}{
+	\steps{\len{e}}{\len{e'}}
+}
+
+\inferrule{\Jval{e_1}}{
+	\steps{\letbind{e_1}{x}{e_2}}{\subst{e_1}{x}{e_2}}
+}
+
+\inferrule{
+	\steps{e_1}{e_1'}
+}{
+	\steps{\letbind{e_1}{x}{e_2}}
+		  {\letbind{e_1'}{x}{e_2}}
+}
+\end{mathpar}
+$\fbox{\inferrule{}{\err{e}}}$
+\begin{mathpar}
+\inferrule{ }{
+	\err{\plus{\Estr{s}}{e_2}}
+}
+
+\inferrule{ }{
+	\err{\plus{\Enum{n}}{\Estr{s}}}
+}
+
+\inferrule{
+	\err{e_1}
+}{
+	\err{\plus{e_1}{e_2}}
+}
+
+\inferrule{
+	\err{e_2}
+}{
+	\err{\plus{\Enum{n}}{e_2}}
+}
+
+\inferrule{ }{
+	\err{\mult{\Estr{s}}{e_2}}
+}
+
+\inferrule{ }{
+	\err{\mult{\Enum{n}}{\Estr{s}}}
+}
+
+\inferrule{
+	\err{e_1}
+}{
+	\err{\mult{e_1}{e_2}}
+}
+
+\inferrule{
+	\err{e_2}
+}{
+	\err{\mult{\Enum{n}}{e_2}}
+}
+
+\inferrule{ }{
+	\err{\cat{\Enum{n}}{e_2}}
+}
+
+\inferrule{ }{
+	\err{\cat{\Estr{s}}{\Enum{n}}}
+}
+
+\inferrule{
+	\err{e_1}
+}{
+	\err{\cat{e_1}{e_2}}
+}
+
+\inferrule{
+	\err{e_2}
+}{
+	\err{\cat{\Estr{s}}{e_2}}
+}
+
+\inferrule{ }{
+	\err{\len{\Enum{n}}}
+}
+
+\inferrule{\err{e}}{
+	\err{\len{e}}
+}
+
+\inferrule{\err{e_1}}{
+	\err{\letbind{e_1}{x}{e_2}}
+}
+\end{mathpar}
+$\fbox{\eval{e}{e'}}$
+\begin{mathpar}
+\inferrule{ }{
+	\eval{\Enum{n}}{\Enum{n}}
+}
+
+\inferrule{ }{
+	\eval{\Estr{s}}{\Estr{s}}
+}
+
+\inferrule{
+	\eval{e_1}{\Enum{n_1}}\\
+	\eval{e_2}{\Enum{n_2}}
+}{
+	\eval{\plus{e_1}{e_2}}{\Enum{n_1 + n_2}}
+}
+
+\inferrule{
+	\eval{e_1}{\Enum{n_1}}\\
+	\eval{e_2}{\Enum{n_2}}
+}{
+	\eval{\mult{e_1}{e_2}}{\Enum{n_1 \cdot n_2}}
+}
+
+\inferrule{
+	\eval{e_1}{\Estr{s_1}}\\
+	\eval{e_2}{\Estr{s_2}}
+}{
+	\eval{\cat{e_1}{e_2}}{\Estr{s_1 s_2}}
+}
+
+\inferrule{
+	\eval{e}{\Estr{s}}\\
+  |s| = n
+}{
+	\eval{\len{e}}{\Enum{n}}
+}
+
+\inferrule{
+	\eval{e_1}{e_1'}\\
+	\eval{\subst{e_1'}{x}{e_2}}{e_2'}
+}{
+	\eval{\letbind{e_1}{x}{e_2}}{e_2'}
+}
+
+  
+\end{mathpar}
+
+\section{Statics of \Lnumstr}
+$\fbox{\inferrule{}{\typeJC{e}{\tau}}}$
+\begin{mathpar}
+\inferrule{\hasType{x}{\tau} \in \ctx}{
+	\typeJC{x}{\tau}
+}
+
+\inferrule{ }{
+	\typeJC{\Enum{n}}{\Enumt}
+}
+
+\inferrule{ }{
+	\typeJC{\Estr{s}}{\Estrt}
+}
+
+\inferrule{
+	\typeJC{e_1}{\Enumt}\\
+	\typeJC{e_2}{\Enumt}
+}{
+	\typeJC{\plus{e_1}{e_2}}{\Enumt}
+}
+
+\inferrule{
+	\typeJC{e_1}{\Enumt}\\
+	\typeJC{e_2}{\Enumt}
+}{
+	\typeJC{\mult{e_1}{e_2}}{\Enumt}
+}
+
+\inferrule{
+	\typeJC{e_1}{\Estrt}\\
+	\typeJC{e_2}{\Estrt}
+}{
+	\typeJC{\cat{e_1}{e_2}}{\Estrt}
+}
+
+\inferrule{
+	\typeJC{e}{\Estrt}
+}{
+	\typeJC{\len{e}}{\Enumt}
+}
+
+\inferrule{
+	\typeJC{e_1}{\tau_1}\\
+	\typeJ{\xCtx{x}{\tau_1}}{e_2}{\tau_2}
+}{
+	\typeJC{\letbind{e_1}{x}{e_2}}{\tau_2}
+}
+\end{mathpar}
+
+\end{document}
+
+
+
